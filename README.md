@@ -28,7 +28,7 @@ git clone https://github.com/zealgit86/nas-short-video.git
 cd nas-short-video
 cp .env.example .env
 mkdir -p media/library media/mobile data
-docker compose build
+docker build -t nas-short-video:local .
 # 此命令会交互式询问密码，不要将密码写入命令行。
 docker run --rm -it --entrypoint caddy nas-short-video:local hash-password
 ```
