@@ -18,3 +18,38 @@ jobs:
       - run: pnpm test --watchAll=false --runInBand
       - run: pnpm build
       - run: python3 -m py_compile people-api.py
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t nas-short-video:check .
+      - name: Check container startup and authenticated catalog
+        run: |
+          python3 - <<'PY'
+          import json, subprocess, time, urllib.request, urllib.error, urllib.parse
+          image = 'nas-short-video:check'
+          digest = subprocess.check_output(['docker', 'run', '--rm', '--entrypoint', 'caddy', image, 'hash-password', '--plaintext', 'ci-fixture-only'], text=True).strip()
+          subprocess.run(['docker', 'run', '-d', '--name', 'video-check', '-p', '127.0.0.1:8765:8765', '-e', 'PUBLIC_URL=http://localhost:8765', '-e', 'AUTH_SECRET=' + digest, image], check=True)
+          base = 'http://localhost:8765'
+          try:
+              for attempt in range(30):
+                  try:
+                      with urllib.request.urlopen(base, timeout=2) as response:
+                          assert response.status == 200
+                      break
+                  except OSError:
+                      time.sleep(1)
+              else:
+                  raise AssertionError('container did not start')
+              try:
+                  urllib.request.urlopen(base + '/api/catalog', timeout=10)
+              except urllib.error.HTTPError as error:
+                  assert error.code == 401
+              else:
+                  raise AssertionError('unauthenticated catalog accepted')
+              with urllib.request.urlopen(base + '/api/catalog?' + urllib.parse.urlencode({'hash': digest}), timeout=10) as response:
+                  assert json.load(response) == []
+              print('PASS container starts; authentication enforced; empty catalog readable')
+          finally:
+              subprocess.run(['docker', 'rm', '-f', 'video-check'], check=True)
+          PY
