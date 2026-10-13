@@ -1,5 +1,7 @@
 # NAS Short Video
 
+[中文](#功能) | [English](#english)
+
 把 NAS 里的视频变成可以上下滑动的私人短视频库。
 
 A self-hosted, mobile-friendly video feed for your NAS, with people, favorites, thumbnails and uploads.
@@ -83,3 +85,89 @@ python3 -m py_compile people-api.py
 ## 致谢与许可证
 
 MIT。感谢 [Erin](https://github.com/will-moss/erin) 作者 Will Moss，以及 React、Caddy 和 FFmpeg 项目。上游声明完整保留于 [LICENSE](LICENSE)。此仓库只包含源码和通用部署示例，不包含任何个人视频、头像、人物资料、访问密码或私人部署脚本。
+
+---
+
+## English
+
+A self-hosted, mobile-friendly video library that lets you swipe through videos stored on your NAS.
+
+Based on [will-moss/erin](https://github.com/will-moss/erin), with the upstream MIT license and copyright notice preserved. This is a community fork and is not affiliated with TikTok or Douyin. The current interface is primarily in Chinese; this section provides English setup and usage documentation.
+
+### Features
+
+- Random video feed; tap to pause and double-tap to favorite.
+- Hold for 2× playback, or select 1× / 1.5× / 2× with the speed button.
+- Create people, customize avatars, assign videos, remove assignments and move videos between people.
+- Automatically use a video thumbnail as the avatar when no custom avatar is set.
+- Thumbnail galleries for people and favorites, showing dates, duration and file size.
+- Open a gallery video at its original list position, swipe in both directions, and return to the current video's position in the gallery.
+- Upload videos from a phone to a selected person; choose or create a destination folder without overwriting existing files.
+- Refresh the index in the browser and see how many videos were added.
+- Permanently delete source videos after confirmation.
+- Password protection, Docker Compose deployment, and cached thumbnails and video metadata.
+
+### Quick start
+
+Install Docker and Docker Compose. The initial image build needs internet access to download dependencies for Node, Caddy, Python and FFmpeg.
+
+```sh
+git clone https://github.com/zealgit86/nas-short-video.git
+cd nas-short-video
+cp .env.example .env
+mkdir -p media/library media/mobile data
+docker build -t nas-short-video:local .
+# Enter the password interactively; do not put it on the command line.
+docker run --rm -it --entrypoint caddy nas-short-video:local hash-password
+```
+
+Paste the complete generated bcrypt hash into `.env`, preserving the single quotes:
+
+```dotenv
+AUTH_SECRET='paste the complete generated bcrypt hash here'
+```
+
+Set `LIBRARY_PATH` and `UPLOAD_PATH` in `.env` to your video directories. To access the app from a phone, set `BIND_ADDRESS` to your NAS's LAN IP and `PUBLIC_URL` to `http://YOUR_NAS_LAN_IP:8765`.
+
+```sh
+docker compose up -d
+```
+
+Open `PUBLIC_URL` and enter the password you chose. On your first visit, open “视频目录” (video directories) at the top left, then choose “刷新索引” (refresh index). Large libraries continue scanning in the background; progress is shown in the interface.
+
+### Files and permissions
+
+The container uses two logical directories: `library` for the video library and `mobile` for uploads. You can choose any host directories; their names do not need to match these logical names. Person assignments use relative video paths, so keep the logical mount names stable after deployment.
+
+- `data/` stores person records, the index, thumbnails and metadata caches. Persist this directory and back it up.
+- Favorites are stored in the current browser. Person records are shared across devices; favorites do not automatically sync across devices.
+- Video mounts are writable by default to support uploads and deletion. For viewing only, add `:ro` to the corresponding Compose mounts. Uploads, folder creation and deletion will then fail.
+- Deletion permanently removes the original file from your NAS. Check before confirming; the app does not provide a recycle bin.
+- The scanner includes MP4, MOV, WEBM and OGG files by default. Playback depends on browser codec support. The app does not automatically transcode incompatible videos.
+- Uploads are limited to 8 GiB per file. Closing the page interrupts the upload; resumable uploads are not supported. Name collisions get a new filename to avoid overwriting files.
+- Automatic avatars use the thumbnail endpoint and do not overwrite custom avatars. People without videos display the first character of their name.
+
+### Security and deployment limits
+
+This app is intended for personal use on a home LAN or through a VPN. It binds to localhost by default and has not been audited as a public, multi-user service.
+
+Authentication follows Erin's design: authenticated media and API URLs include an access token. Do not share those URLs, logs, `.env` files or person records. The token is represented by a bcrypt string but must still be treated as an access credential. Use HTTP only on a trusted LAN; for remote access, use a VPN or configure an HTTPS reverse proxy. Only import trusted metadata, as metadata captions may contain HTML.
+
+See [deployment notes](docs/DEPLOYMENT.md) (Chinese) and [security notes](SECURITY.md) (English).
+
+### Development
+
+```sh
+corepack enable
+corepack prepare pnpm@10.11.0 --activate
+pnpm install --frozen-lockfile
+pnpm test --watchAll=false --runInBand
+pnpm build
+python3 -m py_compile people-api.py
+```
+
+The frontend uses React. Caddy serves static files and handles authentication. A Python service handles indexing, people, uploads, deletion and thumbnails. The production image uses a multi-stage Dockerfile and does not depend on the maintainer's NAS images or private paths.
+
+### Credits and license
+
+MIT. Thanks to [Erin](https://github.com/will-moss/erin) author Will Moss, and to the React, Caddy and FFmpeg projects. The upstream notice is preserved in [LICENSE](LICENSE). This repository contains source code and generic deployment examples; it does not include personal videos, avatars, person records, access passwords or private deployment scripts.
