@@ -1,0 +1,47 @@
+.media {
+  position: relative;
+  width: 100%;
+  text-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: black;
+}
+
+html[data-scroll-direction="horizontal"] .media {
+  flex-grow: 1;
+  flex-shrink: 0;
+}
+
+.media::before {
+  content: "";
+  display: block;
+  box-shadow: 0 -33px 48px rgba(0, 0, 0, 0.5) inset;
+  width: 100%;
+  pointer-events: none;
+  height: 100%;
+  top: 0;
+  left: 0;
+  position: absolute;
+  background: transparent;
+}
+
+.player {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1;
+  height: calc(100% - 56px);
+  flex-shrink: 0;
+}
+
+.player[hidden] {
+  display: none;
+}
+
+.media-image {
+  object-fit: contain;
+}

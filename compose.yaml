@@ -1,0 +1,21 @@
+services:
+  nas-short-video:
+    build: .
+    image: nas-short-video:local
+    restart: unless-stopped
+    ports:
+      - "${BIND_ADDRESS:-127.0.0.1}:8765:8765"
+    environment:
+      PUBLIC_URL: "${PUBLIC_URL:-http://localhost:8765}"
+      AUTH_ENABLED: "true"
+      AUTH_SECRET: "${AUTH_SECRET:?Set a Caddy bcrypt hash in .env}"
+      APP_TITLE: "NAS Short Video"
+    volumes:
+      - "${LIBRARY_PATH:-./media/library}:/srv/videos/library"
+      - "${UPLOAD_PATH:-./media/mobile}:/srv/videos/mobile"
+      - "${DATA_PATH:-./data}:/srv/appdata"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

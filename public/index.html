@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-scroll-direction="__SCROLL_DIRECTION__">
+  <head>
+    <meta charset="utf-8" />
+
+    <link rel="icon" href="/favicon.ico" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+
+    <link rel="stylesheet" href="/reset.min.css" />
+
+    <title>__APP_TITLE__</title>
+
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="icon" href="/favicon-32x32.png" type="image/png" sizes="32x32" />
+    <link rel="icon" href="/favicon-16x16.png" type="image/png" sizes="16x16" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content="#050505" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#050505" media="(prefers-color-scheme: dark)" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+
+    <script>
+      window.PUBLIC_URL = window.location.origin;
+      window.USE_SECRET = __USE_SECRET__;
+      window.USE_CUSTOM_SKIN = __USE_CUSTOM_SKIN__;
+      if (window.location.protocol === "https:")
+        window.PUBLIC_URL = window.PUBLIC_URL.replace("http:", "https:");
+      window.AUTOPLAY_ENABLED = __AUTOPLAY_ENABLED__;
+      window.IMAGE_DISPLAY_DURATION = __IMAGE_DISPLAY_DURATION__;
+      window.START_MUTED = __START_MUTED__;
+      window.PROGRESS_BAR_POSITION = "__PROGRESS_BAR_POSITION__";
+      window.IGNORE_HIDDEN_PATHS = __IGNORE_HIDDEN_PATHS__;
+      window.VIDEO_START_POSITION = "__VIDEO_START_POSITION__";
+    </script>
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="app"></div>
+  </body>
+</html>
