@@ -503,14 +503,15 @@ const VideoFeed = forwardRef(
       { root: null, rootMargin: "0px", threshold: 0.95 },
     );
 
-    cardRefs.current.forEach((card) => {
+    const observedCards = cardRefs.current.slice();
+    observedCards.forEach((card) => {
       if (card) observer.observe(card);
     });
 
     return () => {
       observer.disconnect();
       stopImageTimeline(false);
-      cardRefs.current.forEach((card) => stopCardPlayback(card));
+      observedCards.forEach((card) => stopCardPlayback(card));
       currentMediaCard.current = null;
     };
   }, [videos]); // eslint-disable-line react-hooks/exhaustive-deps

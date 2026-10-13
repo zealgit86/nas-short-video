@@ -73,7 +73,7 @@ docker compose up -d
 corepack enable
 corepack prepare pnpm@10.11.0 --activate
 pnpm install --frozen-lockfile
-pnpm test -- --watch=false --runInBand
+pnpm test --watchAll=false --runInBand
 pnpm build
 python3 -m py_compile people-api.py
 ```

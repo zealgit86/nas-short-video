@@ -15,6 +15,6 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm test -- --watch=false --runInBand
+      - run: pnpm test --watchAll=false --runInBand
       - run: pnpm build
       - run: python3 -m py_compile people-api.py
